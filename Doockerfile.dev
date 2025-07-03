@@ -1,0 +1,118 @@
+# Use Node.js Alpine-based image for smaller size
+FROM node:18-alpine
+
+# Set working directory in container
+WORKDIR /app 
+
+# Copy package.json first for better caching
+COPY package.json .
+
+# Install dependencies
+RUN npm install
+# COPY . . -> this is not used because we will use volumes for development , what is volumes ? so volumes are used to mount the local directory to the container directory , so that we can see the changes in the local directory in the container directory and vice versa , so that we can see the changes in the local directory in the container directory and vice versa
+# NOTE: We intentionally don't COPY . . here because we'll use volumes for development
+
+EXPOSE 3000
+
+# Environment variables for development hot-reloading
+ENV CHOKIDAR_USEPOLLING=true
+ENV WATCHPACK_POLLING=true
+ENV FAST_REFRESH=false
+
+CMD ["npm", "run", "start"]
+
+# ===================== IMPORTANT DOCUMENTATION =====================
+
+# HOW TO USE THIS DOCKERFILE FOR DEVELOPMENT:
+
+# 1. Build the image:
+#    docker build -f Dockerfile.dev -t frontend-dev .
+
+# 2. Run with real-time updates (choose based on your system):
+
+#    For WSL/Linux/Mac:
+#    docker run -p 3000:3000 --mount type=bind,source="$(pwd)",target=/app -v /app/node_modules frontend-dev
+
+#    For Windows CMD:
+#    docker run -p 3000:3000 --mount type=bind,source="%cd%",target=/app -v /app/node_modules frontend-dev
+
+#    For Windows PowerShell:
+#    docker run -p 3000:3000 --mount type=bind,source="${PWD}",target=/app -v /app/node_modules frontend-dev
+
+# ===================== EXPLANATION OF FLAGS =====================
+
+# -p 3000:3000
+#    Maps port 3000 from container to host machine
+#    Format: -p <host-port>:<container-port>
+
+# --mount type=bind,source="$(pwd)",target=/app
+#    Creates a bind mount for real-time file updates
+#    source: Your local project directory
+#    target: Where it's mounted in container
+
+# -v /app/node_modules
+#    Preserves the container's node_modules
+#    Prevents overwriting with host's node_modules
+
+# ===================== ENVIRONMENT VARIABLES =====================
+
+# CHOKIDAR_USEPOLLING=true
+#    Enables file change detection in containers
+
+# WATCHPACK_POLLING=true
+#    Enables webpack file watching in containers
+
+# FAST_REFRESH=false
+#    Prevents refresh conflicts in development
+
+# ===================== TROUBLESHOOTING =====================
+
+# 1. If changes aren't reflecting:
+#    - Ensure you're using the --mount flag correctly
+#    - Check if you're in the correct directory
+#    - Try rebuilding the image
+
+# 2. If build fails:
+#    - Verify package.json is present
+#    - Check npm install errors
+#    - Ensure proper node version
+
+# 3. If container won't start:
+#    - Check if port 3000 is already in use
+#    - Verify all environment variables
+
+# ===================== BEST PRACTICES =====================
+
+# 1. Always use Dockerfile.dev for development
+# 2. Use separate production Dockerfile for deployment
+# 3. Don't commit node_modules to version control
+# 4. Keep your .dockerignore file updated
+# 5. Use volume mounts only in development
+
+# ===================== ADDITIONAL COMMANDS =====================
+
+# Stop container:
+# docker stop <container_id>
+
+# Remove container:
+# docker rm <container_id>
+
+# View logs:
+# docker logs <container_id>
+
+# Interactive shell:
+# docker exec -it <container_id> sh
+
+# To see changes in real time, you can use the following command:
+
+# so in doing A complete copy of the whole app in to the container what we will do is to make a reference to the local folder in the container
+# docker run -p 3000:3000 -v /app/node_modules -v $(pwd):/app {image_name} -> for linux , wsl , mac \
+# docker run -p 3000:3000 -v /app/node_modules -v %cd%:/app {image_name} -> for windows
+# docker run -p 3000:3000 -v /app/node_modules -v $(pwd):/app {image_name} -> for windows powershell
+
+# to sync or map the ports run 
+# docker run -p {port_of_your_app_using:port of docker} {image_name} 
+# docker run -p {port_of_your_app_using:port of docker} {image_number}
+
+
+

@@ -1,0 +1,34 @@
+version: '3'
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+
+    volumes:
+      - /app/node_modules
+      - .:/app
+
+    ports:
+      - 3000:3000
+
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+      - FAST_REFRESH=false
+
+  tests:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+
+    volumes:
+      - /app/node_modules
+      - .:/app
+    command: ["npm", "run", "test"]
+
+# attach the tests to the frontend service
+#to run #docker run compose -> docker compose up -> docker compose up --build
+
+
+# so to run and see realtime upadtes and tests we need to run docker compose up --build and then docker exec -it {container_id} npm run test , conatiner id -> docker ps -> docker inspect {container_id} -> look for the id in the json file -> "HostConfig": { "Binds": [ "C:\\Users\\sahil\\Desktop\\CI-CD_pipleine\\Appss\\frontend\\src:/app/src" ] }
